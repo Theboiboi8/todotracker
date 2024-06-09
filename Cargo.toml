@@ -1,5 +1,8 @@
 [package]
 name = "todotracker"
+description = "A simple cli application to manage your TODOs"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 version = "0.1.0"
 edition = "2021"
 
