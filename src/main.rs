@@ -1,8 +1,11 @@
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, IntoEnumIterator};
+
+const STATE_MANIFEST_VERSION: usize = 1;
 
 fn main() {
 	let mut state = State::new();
@@ -57,6 +60,7 @@ fn main() {
 struct State {
 	pub entries: Vec<TodoEntry>,
 	pub exit: bool,
+	pub manifest_version: usize,
 }
 
 struct CommandState {
@@ -89,6 +93,7 @@ impl State {
 		State {
 			entries: Vec::<TodoEntry>::new(),
 			exit: false,
+			manifest_version: STATE_MANIFEST_VERSION,
 		}
 	}
 }
@@ -237,6 +242,18 @@ impl Command {
 						should_abort = true;
 						State::new()
 					});
+					
+					match data.manifest_version.cmp(&state.manifest_version) {
+						Ordering::Less => {
+							eprintln!("This save file has an old manifest version, \
+							and may not load correctly");
+						}
+						Ordering::Greater => {
+							eprintln!("This save file has been created with a newer version, \
+							and may not load correctly");
+						}
+						Ordering::Equal => {}
+					}
 
 					if data.entries != state.entries && !state.entries.is_empty() {
 						let mut valid = false;
